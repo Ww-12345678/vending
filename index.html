@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>우리 자판기 재고 현황</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f2f4f8;
+      text-align: center;
+      padding: 50px;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 40px;
+      margin: auto;
+      width: 320px;
+      border-radius: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #666;
+      margin-top: 0;
+    }
+    #stock {
+      font-size: 64px;
+      color: #007bff;
+      margin: 25px 0;
+      font-weight: bold;
+    }
+    .status {
+      font-size: 18px;
+      color: #444;
+    }
+    button {
+      margin-top: 30px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>자판기 재고 확인</h1>
+    <p>현재 남은 음료 수량</p>
+    <div id="stock">로딩 중...</div>
+    <div id="status" class="status"></div>
+    <button onclick="loadStock()">재고 새로고침</button>
+  </div>
+
+  <script>
+    // GitHub raw JSON 경로 (수정할 필요 없음)
+    const dataUrl = 'https://raw.githubusercontent.com/Ww-12345678/vending/main/data.json';
+
+    async function loadStock() {
+      try {
+        const res = await fetch(dataUrl, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const stock = Number(data.stock);
+
+        const stockDiv = document.getElementById('stock');
+        const statusDiv = document.getElementById('status');
+
+        if (isNaN(stock)) {
+          stockDiv.innerText = "데이터 오류";
+          statusDiv.innerText = "data.json 형식 확인 필요";
+          return;
+        }
+
+        stockDiv.innerText = stock + " 개";
+        if (stock > 0) {
+          statusDiv.innerText = "상태: 판매 중 ✅";
+          statusDiv.style.color = "#28a745";
+        } else {
+          statusDiv.innerText = "상태: 품절 ❌";
+          statusDiv.style.color = "#dc3545";
+        }
+      } catch (err) {
+        document.getElementById('stock').innerText = "불러오기 실패";
+        document.getElementById('status').innerText = "네트워크 또는 파일 경로 오류";
+        console.error(err);
+      }
+    }
+
+    // 처음 페이지 열릴 때 자동 실행
+    loadStock();
+  </script>
+</body>
+</html>
